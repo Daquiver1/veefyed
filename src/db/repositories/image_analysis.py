@@ -43,7 +43,7 @@ class ImageAnalysisRepository(BaseRepository):
         GET_ANALYSIS_QUERY, values = Helpers.generate_select_query(  # noqa: N806
             table_name="image_analysis",
             conditions=conditions,
-            order_by="analyzed_at DESC",
+            order_by="created_at DESC",
             limit=1,
         )
         result = await self.db.fetch_one(GET_ANALYSIS_QUERY, values=values)

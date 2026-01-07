@@ -1,7 +1,5 @@
 """Image analysis models."""
 
-from datetime import datetime
-
 from pydantic import BaseModel
 
 from src.enums.skin import SkinIssue, SkinType
@@ -15,8 +13,7 @@ class ImageAnalysisBase(BaseModel):
     skin_type: SkinType
     issues: list[SkinIssue]
     confidence_score: float
-    model_ver4555sion: str
-    analyzed_at: datetime
+    model_version: str
 
 
 class ImageAnalysisCreate(ImageAnalysisBase):

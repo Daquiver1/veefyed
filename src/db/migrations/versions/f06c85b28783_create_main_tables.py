@@ -74,10 +74,10 @@ def create_images_table() -> None:
     )
 
 
-def create_image_analyses_table() -> None:
+def create_image_analysis_table() -> None:
     """Create image analyses table."""
     op.create_table(
-        "image_analyses",
+        "image_analysis",
         sa.Column(
             "id",
             sa.String(36),
@@ -111,12 +111,6 @@ def create_image_analyses_table() -> None:
             sa.String(50),
             nullable=False,
         ),
-        sa.Column(
-            "analyzed_at",
-            sa.DateTime,
-            nullable=False,
-            server_default=sa.func.current_timestamp(),
-        ),
         sa.CheckConstraint(
             "confidence_score >= 0.0 AND confidence_score <= 1.0",
             name="confidence_score_range_check",
@@ -130,9 +124,9 @@ def create_image_analyses_table() -> None:
     )
 
     op.create_index(
-        "idx_image_analyses_image_time",
-        "image_analyses",
-        ["image_id", "analyzed_at"],
+        "idx_image_analysis_image_time",
+        "image_analysis",
+        ["image_id", "created_at"],
     )
 
 
@@ -186,14 +180,14 @@ def create_api_keys_table() -> None:
 def upgrade() -> None:
     """Upgrade database"""
     create_images_table()
-    create_image_analyses_table()
+    create_image_analysis_table()
     create_api_keys_table()
 
 
 def downgrade() -> None:
     """Downgrade database"""
     tables = [
-        "image_analyses",
+        "image_analysis",
         "images",
         "api_keys",
     ]
