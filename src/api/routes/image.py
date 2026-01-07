@@ -11,6 +11,7 @@ from src.db.repositories.image import ImageRepository
 from src.enums.api_key import ApiKeyScope
 from src.models.api_key import ApiKeyInDb
 from src.models.image import ImageCreate, ImagePublic
+from src.utils.helpers import Helpers
 
 image_router = APIRouter()
 
@@ -27,7 +28,18 @@ async def upload_image(
     # api_key: Annotated[ApiKeyInDb, Depends(require_api_scope(ApiKeyScope.upload))],
 ) -> ImagePublic:
     """Upload image metadata."""
-    
+    _, file_size, storage_path = await Helpers.save_uploaded_file(
+        file=image,
+        allowed_types=["image/jpeg", "image/png"],
+        max_size_mb=5,
+    )
+
+    image_data = ImageCreate(
+        filename=image.filename,
+        content_type=image.content_type,
+        file_size=file_size,
+        storage_path=storage_path,
+    )
     return await image_repo.create_image(image_data)
 
 

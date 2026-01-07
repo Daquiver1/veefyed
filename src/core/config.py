@@ -41,3 +41,6 @@ GROQ_TEMPERATURE = config("GROQ_TEMPERATURE", cast=float, default=0.6)
 GEMINI_API_KEY = config("GEMINI_API_KEY2", cast=str, default="")
 GEMINI_MODEL = config("GEMINI_MODEL_ID", cast=str, default="")
 GEMINI_TEMPERATURE = config("GEMINI_TEMPERATURE", cast=float, default=0.6)
+
+# Storage
+UPLOAD_DIR = config("UPLOAD_DIR", cast=str, default="uploads/images")

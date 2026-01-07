@@ -3,7 +3,15 @@
 import hashlib
 import logging
 import uuid
+from pathlib import Path
 from typing import Any
+from uuid import uuid4
+
+import aiofiles
+from fastapi import UploadFile
+
+from src.core.config import UPLOAD_DIR
+from src.errors.core import CustomizedValueError
 
 app_logger = logging.getLogger("app")
 
@@ -71,3 +79,34 @@ class Helpers:
         """
 
         return create_query, fields
+
+    @staticmethod
+    async def save_uploaded_file(
+        file: UploadFile,
+        allowed_types: list[str] | None = None,
+        max_size_mb: int = 5,
+    ) -> tuple[bytes, int, str]:
+        """Save an uploaded file to disk and return file content, size, and path."""
+        if allowed_types and file.content_type not in allowed_types:
+            raise CustomizedValueError(
+                f"Invalid file format. Only {', '.join(allowed_types)} are supported."
+            )
+
+        content = await file.read()
+        file_size = len(content)
+
+        max_size_bytes = max_size_mb * 1024 * 1024
+        if file_size > max_size_bytes:
+            raise CustomizedValueError(f"File size exceeds the {max_size_mb}MB limit.")
+
+        upload_path = Path(UPLOAD_DIR)
+        upload_path.mkdir(parents=True, exist_ok=True)
+
+        file_extension = Path(file.filename).suffix
+        unique_filename = f"{uuid4()}{file_extension}"
+        file_path = upload_path / unique_filename
+
+        async with aiofiles.open(file_path, "wb") as f:
+            await f.write(content)
+
+        return content, file_size, str(file_path)
