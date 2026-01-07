@@ -11,3 +11,4 @@ uploads/
 .coveragerc
 htmlcov
 .pytest_cache/
+veefyed.db
