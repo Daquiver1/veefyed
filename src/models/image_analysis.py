@@ -31,7 +31,7 @@ class ImageAnalysisPublic(ImageAnalysisBase, UUIDModelMixin, DateTimeModelMixin)
     pass
 
 
-class ImageAnalysisInDb(IsDeletedModelMixin):
+class ImageAnalysisInDb(ImageAnalysisPublic, IsDeletedModelMixin):
     """Model representing image analysis stored in the database."""
 
     pass

@@ -2,7 +2,9 @@
 
 from fastapi import FastAPI
 
-from src.api.routes.review import review_router
+from src.api.routes.api_key import api_key_router
+from src.api.routes.image import image_router
+from src.api.routes.image_analysis import analysis_router
 from src.core import config
 
 
@@ -26,8 +28,6 @@ def setup_routes(app: FastAPI) -> None:
             "service": "QuiverFood API",
         }
 
-    app.include_router(
-        review_router,
-        prefix=f"{api_prefix}/review",
-        tags=["Reviews"],
-    )
+    app.include_router(api_key_router, prefix=api_prefix, tags=["API Keys"])
+    app.include_router(image_router, prefix=api_prefix, tags=["Images"])
+    app.include_router(analysis_router, prefix=api_prefix, tags=["Image Analysis"])

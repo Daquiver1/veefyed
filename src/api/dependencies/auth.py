@@ -4,7 +4,7 @@ import logging
 
 from databases import Database
 from fastapi import Depends, HTTPException, Security, status
-from fastapi.security import APIKeyHeader, OAuth2PasswordBearer
+from fastapi.security import APIKeyHeader
 
 from src.api.dependencies.database import get_database, get_redis
 from src.db.repositories.api_key import ApiKeyRepository
@@ -12,7 +12,6 @@ from src.enums.api_key import ApiKeyScope
 from src.models.api_key import ApiKeyInDb
 from src.services.third_party.redis_client import RedisClient
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/users/login", auto_error=False)
 app_logger = logging.getLogger("app")
 
 
@@ -30,7 +29,7 @@ async def get_api_key_repository(
     return ApiKeyRepository(db, r_db)
 
 
-async def get_api_key_context(
+async def get_api_key(
     api_key: str = Security(API_KEY_HEADER),
     repo: ApiKeyRepository = Depends(get_api_key_repository),  # noqa: B008
 ) -> ApiKeyInDb:
@@ -55,7 +54,7 @@ def require_api_scope(required_scope: ApiKeyScope) -> callable:  # type: ignore
     """Require an API key to have a specific scope."""
 
     async def wrapper(
-        api_key: ApiKeyInDb = Depends(get_api_key_context),  # noqa: B008
+        api_key: ApiKeyInDb = Depends(get_api_key),  # noqa: B008
     ) -> ApiKeyInDb:
         if required_scope not in api_key.scopes:
             raise HTTPException(
@@ -65,15 +64,3 @@ def require_api_scope(required_scope: ApiKeyScope) -> callable:  # type: ignore
         return api_key
 
     return wrapper
-
-
-# async def upload_image(
-#     file: UploadFile,
-#     api_key: ApiKeyContext = Depends(require_api_scope(ApiKeyScope.upload)),
-# ): ...
-
-# @router.post("/analyze")
-# async def analyze_image(
-#     payload: ImageAnalysisRequest,
-#     api_key: ApiKeyContext = Depends(require_api_scope(ApiKeyScope.analyze)),
-# ): ...
