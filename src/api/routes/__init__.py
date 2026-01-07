@@ -28,6 +28,8 @@ def setup_routes(app: FastAPI) -> None:
             "service": "QuiverFood API",
         }
 
-    app.include_router(api_key_router, prefix=api_prefix, tags=["API Keys"])
-    app.include_router(image_router, prefix=api_prefix, tags=["Images"])
-    app.include_router(analysis_router, prefix=api_prefix, tags=["Image Analysis"])
+    app.include_router(api_key_router, prefix=f"{api_prefix}/api-keys", tags=["API Keys"])
+    app.include_router(image_router, prefix=f"{api_prefix}/images", tags=["Images"])
+    app.include_router(
+        analysis_router, prefix=f"{api_prefix}/image-analysis", tags=["Image Analysis"]
+    )

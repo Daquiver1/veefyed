@@ -16,7 +16,7 @@ class ApiKeyBase(BaseModel):
 class ApiKeyCreate(ApiKeyBase):
     """API Key creation model."""
 
-    key_hash: str
+    pass
 
 
 class ApiKeyPublic(ApiKeyBase, DateTimeModelMixin, UUIDModelMixin):
@@ -29,3 +29,4 @@ class ApiKeyInDb(ApiKeyPublic, IsDeletedModelMixin):
     """API Key model in DB."""
 
     key_hash: str
+    key_prefix: str

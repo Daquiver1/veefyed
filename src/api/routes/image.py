@@ -3,7 +3,7 @@
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, UploadFile, status
+from fastapi import APIRouter, Depends, File, UploadFile, status
 
 from src.api.dependencies.auth import require_api_scope
 from src.api.dependencies.database import get_repository
@@ -23,19 +23,18 @@ image_router = APIRouter()
     description="Upload an image and persist metadata. Requires upload scope.",
 )
 async def upload_image(
-    image: UploadFile,
+    image: Annotated[UploadFile, File(description="Image file to upload")],
     image_repo: Annotated[ImageRepository, Depends(get_repository(ImageRepository))],
-    # api_key: Annotated[ApiKeyInDb, Depends(require_api_scope(ApiKeyScope.upload))],
+    api_key: Annotated[ApiKeyInDb, Depends(require_api_scope(ApiKeyScope.upload))],
 ) -> ImagePublic:
     """Upload image metadata."""
-    _, file_size, storage_path = await Helpers.save_uploaded_file(
+    file_size, storage_path = await Helpers.save_uploaded_file(
         file=image,
         allowed_types=["image/jpeg", "image/png"],
         max_size_mb=5,
     )
 
     image_data = ImageCreate(
-        filename=image.filename,
         content_type=image.content_type,
         file_size=file_size,
         storage_path=storage_path,

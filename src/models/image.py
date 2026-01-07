@@ -8,7 +8,6 @@ from src.models.core import DateTimeModelMixin, IsDeletedModelMixin, UUIDModelMi
 class ImageBase(BaseModel):
     """Review base model."""
 
-    filename: str = Field(..., description="Original filename")
     content_type: str
     file_size: int = Field(..., description="Size in bytes")
     storage_path: str = Field(..., description="Local filesystem path")

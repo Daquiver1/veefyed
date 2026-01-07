@@ -27,7 +27,7 @@ class ImageAnalysisRepository(BaseRepository):
     async def create_analysis(self, analysis: ImageAnalysisCreate) -> ImageAnalysisInDb:
         """Create mock AI analysis result."""
         analysis_data = analysis.model_dump()
-        id_ = Helpers.generate_uuid()
+        id_ = await Helpers.generate_uuid()
         analysis_data["id"] = id_
 
         CREATE_IMAGE_ANALYSIS_QUERY, values = Helpers.generate_create_query(  # noqa: N806
@@ -41,7 +41,7 @@ class ImageAnalysisRepository(BaseRepository):
         """Fetch latest analysis for an image."""
         conditions = {"image_id": str(image_id), "is_deleted": False}
         GET_ANALYSIS_QUERY, values = Helpers.generate_select_query(  # noqa: N806
-            table_name="orders",
+            table_name="image_analysis",
             conditions=conditions,
             order_by="analyzed_at DESC",
             limit=1,

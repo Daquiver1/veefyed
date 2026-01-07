@@ -26,7 +26,7 @@ class ImageRepository(BaseRepository):
     async def create_image(self, image: ImageCreate) -> ImageInDb:
         """Persist uploaded image metadata."""
         image_data = image.model_dump()
-        id_ = Helpers.generate_uuid()
+        id_ = await Helpers.generate_uuid()
         image_data["id"] = id_
 
         CREATE_IMAGE_QUERY, values = Helpers.generate_create_query(  # noqa: N806

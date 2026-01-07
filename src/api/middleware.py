@@ -140,11 +140,11 @@ def setup_middleware(app: FastAPI) -> None:
     #         allowed_hosts=[],
     #     )
 
-    app.add_middleware(SecurityHeadersMiddleware)
+    # app.add_middleware(SecurityHeadersMiddleware)
 
-    app.add_middleware(RateLimitMiddleware, calls=100, period=60)
+    # app.add_middleware(RateLimitMiddleware, calls=100, period=60)
 
-    app.add_middleware(GZipMiddleware, minimum_size=1000)
+    # app.add_middleware(GZipMiddleware, minimum_size=1000)
     origins = ["http://localhost:3000", "http://localhost:3001"] if ENV == "DEV" else []
 
     app.add_middleware(
@@ -163,4 +163,4 @@ def setup_middleware(app: FastAPI) -> None:
         expose_headers=["X-Process-Time"],
     )
 
-    app.add_middleware(RequestLoggingMiddleware)
+    # app.add_middleware(RequestLoggingMiddleware)

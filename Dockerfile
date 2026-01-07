@@ -7,7 +7,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
   PYTHONBUFFERED=1
 
 RUN apt-get update \
-  && apt-get -y install netcat-openbsd  \
+  && apt-get -y install netcat-openbsd gcc libpq-dev \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
 

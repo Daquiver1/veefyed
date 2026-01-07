@@ -1,18 +1,21 @@
 """Helper functions for the project"""
 
-import hashlib
 import logging
+import secrets
 import uuid
 from pathlib import Path
 from typing import Any
 from uuid import uuid4
 
 import aiofiles
+from argon2 import PasswordHasher
+from argon2.exceptions import VerifyMismatchError
 from fastapi import UploadFile
 
 from src.core.config import UPLOAD_DIR
 from src.errors.core import CustomizedValueError
 
+ph = PasswordHasher()
 app_logger = logging.getLogger("app")
 
 
@@ -25,9 +28,30 @@ class Helpers:
         return str(uuid.uuid4())
 
     @staticmethod
-    def hash_api_key(api_key: str) -> str:
-        """Hash the API key using a secure hashing algorithm."""
-        return hashlib.sha256(api_key.encode()).hexdigest()
+    def generate_api_key() -> str:
+        """Generates a 32-character API key, prefixed with a human-readable identifier."""
+        secret = secrets.token_urlsafe(32)
+
+        key_id = str(uuid.uuid4()).replace("-", "")[:8]
+
+        return f"api_{key_id}_{secret}"
+
+    @staticmethod
+    def hash_api_key(raw_key: str) -> str:
+        """Hashes the raw API key using the Argon2 algorithm."""
+        return ph.hash(raw_key)
+
+    @staticmethod
+    def verify_api_key(raw_key: str, stored_hash: str) -> bool:
+        """Verifies the raw key against the stored Argon2 hash."""
+        try:
+            ph.verify(stored_hash, raw_key)
+            return True
+        except VerifyMismatchError:
+            return False
+        except Exception as e:
+            app_logger.exception(f"Error during API key verification: {e}")
+            return False
 
     @staticmethod
     def generate_select_query(
@@ -85,8 +109,11 @@ class Helpers:
         file: UploadFile,
         allowed_types: list[str] | None = None,
         max_size_mb: int = 5,
-    ) -> tuple[bytes, int, str]:
+    ) -> tuple[int, str]:
         """Save an uploaded file to disk and return file content, size, and path."""
+        if not file.filename:
+            raise CustomizedValueError("No file was uploaded.")
+
         if allowed_types and file.content_type not in allowed_types:
             raise CustomizedValueError(
                 f"Invalid file format. Only {', '.join(allowed_types)} are supported."
@@ -94,6 +121,9 @@ class Helpers:
 
         content = await file.read()
         file_size = len(content)
+
+        if file_size == 0:
+            raise CustomizedValueError("Uploaded file is empty.")
 
         max_size_bytes = max_size_mb * 1024 * 1024
         if file_size > max_size_bytes:
@@ -109,4 +139,4 @@ class Helpers:
         async with aiofiles.open(file_path, "wb") as f:
             await f.write(content)
 
-        return content, file_size, str(file_path)
+        return file_size, str(file_path)

@@ -23,25 +23,13 @@ async def create_api_key(
     api_key_repo: Annotated[
         ApiKeyRepository, Depends(get_repository(ApiKeyRepository))
     ],
-) -> ApiKeyPublic:
+) -> dict[str, str]:
     """Create API key."""
-    return await api_key_repo.create_api_key(api_key_data)
-
-
-@api_key_router.get(
-    "/{api_key_id}",
-    status_code=status.HTTP_200_OK,
-    summary="Get API key",
-    description="Retrieve API key metadata by ID.",
-)
-async def get_the_api_key(
-    api_key_id: str,
-    api_key_repo: Annotated[
-        ApiKeyRepository, Depends(get_repository(ApiKeyRepository))
-    ],
-) -> ApiKeyPublic:
-    """Fetch API key metadata."""
-    return await api_key_repo.get_active_api_key(api_key_id)
+    key = await api_key_repo.create_api_key(api_key_data)
+    return {
+        "api_key": key,
+        "message": "Store this API key securely; it will not be shown again.",
+    }
 
 
 @api_key_router.get(
@@ -55,3 +43,19 @@ async def get_current_api_key(
 ) -> ApiKeyPublic:
     """Fetch current API key metadata."""
     return api_key
+
+
+@api_key_router.get(
+    "/{api_key}",
+    status_code=status.HTTP_200_OK,
+    summary="Get API key",
+    description="Retrieve API key metadata .",
+)
+async def get_the_api_key(
+    api_key: str,
+    api_key_repo: Annotated[
+        ApiKeyRepository, Depends(get_repository(ApiKeyRepository))
+    ],
+) -> ApiKeyPublic:
+    """Fetch API key metadata."""
+    return await api_key_repo.get_active_api_key(api_key)

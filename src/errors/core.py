@@ -38,7 +38,7 @@ class CustomizedValueError(CoreError):
 
     def __init__(self, additional_message: str | None = None) -> None:
         """Initializes the error with the entity name and a dynamic message."""
-        message = "Value Error"
+        message = "Bad Request"
         if additional_message:
             message += f": {additional_message}"
         super().__init__(message, status.HTTP_400_BAD_REQUEST)

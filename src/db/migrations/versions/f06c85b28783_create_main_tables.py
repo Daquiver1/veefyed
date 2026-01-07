@@ -53,11 +53,6 @@ def create_images_table() -> None:
             primary_key=True,
         ),
         sa.Column(
-            "filename",
-            sa.String(255),
-            nullable=False,
-        ),
-        sa.Column(
             "content_type",
             sa.String(50),
             nullable=False,
@@ -74,21 +69,9 @@ def create_images_table() -> None:
             nullable=False,
             unique=True,
         ),
-        sa.Column(
-            "uploaded_at",
-            sa.DateTime,
-            nullable=False,
-            server_default=sa.func.current_timestamp(),
-        ),
-        sa.CheckConstraint(
-            "content_type IN ('image/jpeg', 'image/png')",
-            name="image_content_type_check",
-        ),
         *timestamps(),
         is_deleted(),
     )
-
-    op.create_index("idx_images_uploaded_at", "images", ["uploaded_at"])
 
 
 def create_image_analyses_table() -> None:
@@ -175,6 +158,13 @@ def create_api_keys_table() -> None:
             index=True,
         ),
         sa.Column(
+            "key_prefix",
+            sa.String(255),
+            nullable=False,
+            unique=True,
+            index=True,
+        ),
+        sa.Column(
             "scopes",
             sa.Text,
             nullable=False,
@@ -209,4 +199,4 @@ def downgrade() -> None:
     ]
 
     for table in tables:
-        op.execute(f"DROP TABLE IF EXISTS {table} CASCADE")
+        op.execute(f"DROP TABLE IF EXISTS {table}")
