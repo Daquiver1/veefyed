@@ -1,0 +1,8 @@
+/bin
+/include
+/lib
+.DS_Store
+**/__pycache__
+.vscode/
+logs/
+.env

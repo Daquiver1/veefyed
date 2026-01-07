@@ -1,0 +1,6 @@
+[flake8]
+ignore = E501, E203, W503, E402, D401, D102, D101 D400, B008, C901, ANN101, N806, TRY300, TRY003, ANN102, N805, D107, TRY301, ANN204
+
+max-line-length = 100
+max-complexity = 15
+filename = src/*.py

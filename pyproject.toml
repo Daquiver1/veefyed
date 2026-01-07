@@ -1,0 +1,29 @@
+# pyproject.toml
+
+[tool.ruff]
+ignore = ["D400", "D415", "D401", "PLR0913", "PLR0911", "ANN101", "E501", "PLR0915"]
+
+line-length = 88
+
+[tool.ruff.lint]
+# Choose rule sets (see: https://docs.astral.sh/ruff/settings/)
+select = [
+  "E",   # pycodestyle errors
+  "W",  # pycodestyle
+  "F",   # pyflakes
+  "I",   # isort
+  "N",   # pep8-naming
+  "UP",  # pyupgrade (modernize syntax)
+  "B",   # flake8-bugbear (catch common bugs)
+  "C4",  # flake8-comprehensions
+  "SIM", # flake8-simplify
+  "FAST",
+  "ANN",
+  "S", 
+  "T20",
+  "RET",
+  "ARG",
+  "PTH",
+  "D",
+  "PL"
+]
