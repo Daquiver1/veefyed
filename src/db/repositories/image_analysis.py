@@ -4,8 +4,8 @@ from uuid import UUID
 
 from databases import Database
 
-from db.repositories.base import BaseRepository
-from decorators.db import (
+from src.db.repositories.base import BaseRepository
+from src.decorators.db import (
     handle_get_database_exceptions,
     handle_post_database_exceptions,
 )

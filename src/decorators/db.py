@@ -1,15 +1,11 @@
-"""Decorator for get db operations to handle database exceptions."""
+"""Decorator for database operations (SQLite-compatible)."""
 
 import logging
+import sqlite3
 from functools import wraps
 from typing import Any
 
-from asyncpg import (
-    DataError,
-    ForeignKeyViolationError,
-    PostgresError,
-    UniqueViolationError,
-)
+from sqlalchemy.exc import DataError, IntegrityError, OperationalError
 
 from src.errors.core import InternalServerError, InvalidTokenError
 from src.errors.database import (
@@ -26,23 +22,22 @@ app_logger = logging.getLogger("app")
 
 
 def handle_get_database_exceptions(entity_name: str) -> callable:  # type: ignore
-    """Decorator to handle database exceptions for get operations."""
+    """Decorator to handle database exceptions for get operations (SQLite)."""
 
     def decorator(func: callable) -> callable:  # type: ignore
         @wraps(func)
-        async def wrapper(
-            self,
-            *args: tuple,
-            **kwargs: dict[str, Any],  # noqa
-        ) -> callable:  # type: ignore
+        async def wrapper(self, *args: tuple, **kwargs: dict[str, Any]) -> Any:
             logger = app_logger
             try:
                 return await func(self, *args, **kwargs)
+            except sqlite3.IntegrityError as e:
+                logger.exception(f"IntegrityError for {entity_name}")
+                raise DataTypeError(entity_name=entity_name) from e
             except DataError as e:
                 logger.exception(f"DataError for {entity_name}")
                 raise DataTypeError(entity_name=entity_name) from e
-            except PostgresError as e:
-                logger.exception(f"PostgresError for {entity_name}")
+            except OperationalError as e:
+                logger.exception(f"OperationalError for {entity_name}")
                 raise GeneralDatabaseError(entity_name=entity_name) from e
             except ValueError as e:
                 logger.exception(f"ValueError for {entity_name}")
@@ -56,7 +51,7 @@ def handle_get_database_exceptions(entity_name: str) -> callable:  # type: ignor
                 logger.exception(f"Incorrect credentials for {entity_name}")
                 raise
             except InvalidTokenError:
-                logger.exception(f"Invalid jwt token for {entity_name}")
+                logger.exception(f"Invalid token for {entity_name}")
                 raise
             except Exception as e:
                 logger.exception(f"Unexpected error for {entity_name}")
@@ -74,47 +69,41 @@ def handle_post_database_exceptions(
     foreign_key_entity: str = "Entity",
     already_exists_entity: str = "Entity",
 ) -> callable:  # type: ignore
-    """Decorator to handle database exceptions for post operations."""
+    """Decorator to handle database exceptions for post operations (SQLite)."""
 
     def decorator(func: callable) -> callable:  # type: ignore
         @wraps(func)
-        async def wrapper(
-            self,
-            *args: tuple,
-            **kwargs: dict[str, Any],  # noqa
-        ) -> callable:  # type: ignore
+        async def wrapper(self, *args: tuple, **kwargs: dict[str, Any]) -> Any:
             logger = app_logger
             try:
                 return await func(self, *args, **kwargs)
-            except UniqueViolationError as e:
-                logger.exception(f"UniqueViolationError for {entity_name}")
-                if "email" in str(e):
-                    raise AlreadyExistsError(entity_name="Email") from e
-                if "referral_code" in str(e):
-                    raise AlreadyExistsError(entity_name="Referral Code") from e
-                raise AlreadyExistsError(entity_name=already_exists_entity) from e
-            except ForeignKeyViolationError as e:
-                logger.exception(f"ForeignKeyViolationError for {entity_name}")
-                raise ForeignKeyError(entity_name=foreign_key_entity) from e
+            except IntegrityError as e:
+                logger.exception(f"IntegrityError for {entity_name}")
+                msg = str(e.orig).lower() if e.orig else ""
+                if "unique" in msg:
+                    raise AlreadyExistsError(entity_name=already_exists_entity) from e
+                if "foreign key" in msg:
+                    raise ForeignKeyError(entity_name=foreign_key_entity) from e
+                raise GeneralDatabaseError(entity_name=entity_name) from e
             except DataError as e:
                 logger.exception(f"DataError for {entity_name}")
                 raise DataTypeError(entity_name=entity_name) from e
-            except PostgresError as e:
-                logger.exception(f"PostgresError for {entity_name}")
+            except OperationalError as e:
+                logger.exception(f"OperationalError for {entity_name}")
                 raise GeneralDatabaseError(entity_name=entity_name) from e
-            except NotFoundError:
-                logger.exception(f"NotFoundError for {entity_name}")
-                raise
             except ValueError as e:
                 logger.exception(f"ValueError for {entity_name}")
                 raise BadRequestError(
                     f"Bad Request: Invalid details for {entity_name}"
                 ) from e
+            except NotFoundError:
+                logger.exception(f"NotFoundError for {entity_name}")
+                raise
             except IncorrectCredentialsError:
                 logger.exception(f"Incorrect credentials for {entity_name}")
                 raise
             except InvalidTokenError:
-                logger.exception(f"Invalid jwt token for {entity_name}")
+                logger.exception(f"Invalid token for {entity_name}")
                 raise
             except Exception as e:
                 logger.exception(f"Unexpected error for {entity_name}")

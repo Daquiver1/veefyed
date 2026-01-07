@@ -2,14 +2,11 @@
 
 import logging
 
-import pytz
 from redis.exceptions import RedisError
 
 import redis
 
 app_logger = logging.getLogger("app")
-
-APP_TIMEZONE = pytz.timezone("Africa/Accra")
 
 
 class RedisClient:
@@ -35,9 +32,9 @@ class RedisClient:
         """Clear ALL data in the current Redis database."""
         try:
             self.redis.flushdb()
-            print("All Redis data cleared.")
+            app_logger.info("All Redis data cleared.")
         except RedisError as e:
-            print(f"Redis error: {e}")
+            app_logger.info(f"Redis error: {e}")
 
     def get_cache(self, *, key: str, repo_name: str) -> str | None:
         """Get a cached value."""
@@ -46,7 +43,7 @@ class RedisClient:
             cached_value = self.redis.get(cache_key)
             return cached_value if cached_value else None
         except RedisError as e:
-            print(f"Redis error getting cache {key}: {e}")
+            app_logger.info(f"Redis error getting cache {key}: {e}")
             return None
 
     def set_cache(
@@ -57,7 +54,7 @@ class RedisClient:
             cache_key = f"cache:{repo_name}:{key}"
             return self.redis.setex(cache_key, ttl, value)
         except RedisError as e:
-            print(f"Redis error setting cache {key}: {e}")
+            app_logger.info(f"Redis error setting cache {key}: {e}")
             return False
 
     def invalidate_cache(self, *, repo_name: str, key: str) -> bool:
@@ -66,7 +63,7 @@ class RedisClient:
             cache_key = f"cache:{repo_name}:{key}"
             return self.redis.delete(cache_key) > 0
         except RedisError as e:
-            print(f"Redis error invalidating cache {key}: {e}")
+            app_logger.info(f"Redis error invalidating cache {key}: {e}")
             return False
 
     def invalidate_repo_cache(self, repo_name: str) -> bool:
@@ -78,5 +75,5 @@ class RedisClient:
                 return self.redis.delete(*keys) > 0
             return True
         except RedisError as e:
-            print(f"Redis error invalidating all cache: {e}")
+            app_logger.info(f"Redis error invalidating all cache: {e}")
             return False
