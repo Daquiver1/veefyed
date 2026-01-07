@@ -7,3 +7,7 @@
 logs/
 .env
 uploads/
+.coverage
+.coveragerc
+htmlcov
+.pytest_cache/

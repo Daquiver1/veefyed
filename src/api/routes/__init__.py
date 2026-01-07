@@ -25,7 +25,7 @@ def setup_routes(app: FastAPI) -> None:
         return {
             "status": "healthy",
             "database": "connected",
-            "service": "QuiverFood API",
+            "service": "Veefyed API",
         }
 
     app.include_router(api_key_router, prefix=f"{api_prefix}/api-keys", tags=["API Keys"])
